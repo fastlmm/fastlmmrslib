@@ -48,7 +48,17 @@ jobs:
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           version: "0.12.24"
-      - name: Build wheel
+      - name: Build portable Linux wheel
+        if: runner.os == 'Linux'
+        uses: PyO3/maturin-action@423a6347767a8b16e65c2a7a7042e4a921528da8 # v1
+        with:
+          maturin-version: "v1.16.0"
+          rust-toolchain: "1.85.0"
+          manylinux: "2_28"
+          target: ${{ runner.arch == 'ARM64' && 'aarch64' || 'x86_64' }}
+          args: --release --locked --out dist -i python${{ matrix.python-version }}
+      - name: Build native macOS or Windows wheel
+        if: runner.os != 'Linux'
         run: uv build --wheel --no-sources --python ${{ matrix.python-version }} --out-dir dist
       - name: Install exact wheel in clean environment
         shell: bash
@@ -126,6 +136,10 @@ jobs:
           sources = list(Path("dist").glob("*.tar.gz"))
           assert len(wheels) == 30, len(wheels)
           assert len(sources) == 1, len(sources)
+          linux = [wheel for wheel in wheels if "manylinux" in wheel.name]
+          assert len(linux) == 10, [wheel.name for wheel in linux]
+          assert all("manylinux_2_28_" in wheel.name for wheel in linux)
+          assert not any(wheel.name.rsplit("-", 1)[-1].startswith("linux_") for wheel in wheels)
           PYTHON
       - name: Validate metadata
         run: uv tool run --python 3.14 twine==7.0.0 check --strict dist/*

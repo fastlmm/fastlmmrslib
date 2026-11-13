@@ -12,6 +12,10 @@ or release tag is authorized merely by preparing this candidate.
   installed wheels on Python 3.11–3.15 on those platforms, and installed
   source-derived wheels on Python 3.11 and 3.15. The final job requires all
   30 wheels and one sdist and validates their metadata with pinned Twine.
+  Linux release wheels are built and audited in manylinux 2.28 containers;
+  require ten such wheels and reject host-specific `linux_*` wheel tags.
+  Linux wheels therefore require glibc 2.28 or later. Local `uv build` wheels
+  validate source/binding behavior but are not the Linux publication artifacts.
 - Review independent analytic reference tests, the NaN-search stall regression,
   concurrent calls, the original notices, and `NOTICE.Davies` provenance.
   Retain original third-party notices verbatim. The historical Microsoft EULA

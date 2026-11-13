@@ -13,6 +13,8 @@
 - Detect non-finite parameter searches and cover the NaN-related stall regression.
 - Qualify Python 3.11–3.15 installed wheels on Linux, macOS, and Windows, on
   x86-64 and ARM64, and source-derived wheels on boundary Python versions.
+- Build Linux release wheels in manylinux 2.28 containers, targeting glibc
+  2.28 or later, and reject host-specific Linux wheel tags before publishing.
 
 The prototype preceding this version passed all 38 native CI jobs. Final
 0.1.0 artifacts require their own successful qualification before publication.
