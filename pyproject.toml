@@ -1,0 +1,17 @@
+[build-system]
+requires = ["maturin==1.16.0"]
+build-backend = "maturin"
+
+[project]
+name = "fastlmmrslib"
+version = "0.0.0"
+description = "Experimental Rust quadratic-form probabilities for FaST-LMM"
+requires-python = ">=3.11"
+readme = "README.md"
+license = "Apache-2.0 AND BSD-2-Clause"
+license-files = ["LICENSE", "NOTICE.Davies", "ThirdPartyNotices.original.txt"]
+
+[tool.maturin]
+features = ["python"]
+python-source = "python"
+module-name = "fastlmmrslib._core"

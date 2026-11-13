@@ -1,0 +1,9 @@
+/target/
+__pycache__/
+.venv/
+*.so
+*.pyd
+/comparison-cases.json
+/comparison-results.json
+/comparison-progress.log
+/comparison-error.log

@@ -1,0 +1,90 @@
+name: CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rust:
+    timeout-minutes: 15
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-2022, windows-11-arm, macos-15-intel, macos-15]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@cfcaf53ba4c621917ec7f78a66bff7a8848ddad4 # 1.85.0
+        with:
+          components: clippy, rustfmt
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.14"
+          architecture: ${{ runner.arch == 'ARM64' && 'arm64' || 'x64' }}
+      - run: cargo fmt --check
+      - run: cargo test --locked
+      - run: cargo clippy --locked --all-targets --all-features -- -D warnings
+  wheels:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-2022, windows-11-arm, macos-15-intel, macos-15]
+        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ runner.arch == 'ARM64' && 'arm64' || 'x64' }}
+      - uses: dtolnay/rust-toolchain@cfcaf53ba4c621917ec7f78a66bff7a8848ddad4 # 1.85.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.12.24"
+      - name: Build wheel
+        run: uv build --wheel --no-sources --python ${{ matrix.python-version }} --out-dir dist
+      - name: Install exact wheel in clean environment
+        shell: bash
+        run: |
+          uv venv --python "${{ matrix.python-version }}" .artifact-venv
+          uv pip install --python .artifact-venv --no-deps dist/*.whl
+      - name: Test installed wheel outside checkout
+        shell: bash
+        working-directory: ${{ runner.temp }}
+        run: |
+          python -c "import pathlib,shutil; shutil.copytree(pathlib.Path(r'${{ github.workspace }}')/'tests',pathlib.Path('quadratic_form_tests'))"
+          uv run --no-project --python "$GITHUB_WORKSPACE/.artifact-venv" python -c "import fastlmmrslib; print(fastlmmrslib.__file__); assert '.artifact-venv' in fastlmmrslib.__file__"
+          uv run --no-project --python "$GITHUB_WORKSPACE/.artifact-venv" python -m unittest discover -s quadratic_form_tests -v
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: wheel-${{ matrix.os }}-${{ matrix.python-version }}
+          path: dist/*.whl
+          if-no-files-found: error
+  sdist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.15"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: dtolnay/rust-toolchain@cfcaf53ba4c621917ec7f78a66bff7a8848ddad4 # 1.85.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.12.24"
+      - run: uv build --sdist --no-sources --out-dir dist
+      - run: uv build --wheel --no-sources --python ${{ matrix.python-version }} --out-dir rebuilt dist/*.tar.gz
+      - name: Test sdist-derived wheel
+        shell: bash
+        run: |
+          uv venv --python "${{ matrix.python-version }}" .artifact-venv
+          uv pip install --python .artifact-venv --no-deps rebuilt/*.whl
+          cd "$RUNNER_TEMP"
+          cp -r "$GITHUB_WORKSPACE/tests" quadratic_form_tests
+          uv run --no-project --python "$GITHUB_WORKSPACE/.artifact-venv" python -m unittest discover -s quadratic_form_tests -v
