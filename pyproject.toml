@@ -4,11 +4,18 @@ build-backend = "maturin"
 
 [project]
 name = "fastlmmrslib"
-version = "0.0.0"
+version = "0.1.0"
 description = "Experimental Rust quadratic-form probabilities for FaST-LMM"
 requires-python = ">=3.11"
 readme = "README.md"
 license = "Apache-2.0 AND BSD-2-Clause"
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+]
 license-files = ["LICENSE", "NOTICE.Davies", "ThirdPartyNotices.original.txt"]
 
 [tool.maturin]
