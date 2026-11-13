@@ -1,12 +1,13 @@
 [package]
 name = "fastlmmrslib"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2021"
 rust-version = "1.85"
 license = "Apache-2.0 AND BSD-2-Clause"
 description = "Experimental reentrant Rust implementation of Davies' quadratic-form probabilities"
-publish = false
-include = ["src/**", "examples/**", "python/**", "tests/**", "Cargo.toml", "Cargo.lock", "pyproject.toml", "README.md", "LICENSE", "NOTICE.Davies", "ThirdPartyNotices.original.txt", "compare_legacy.py"]
+repository = "https://github.com/fastlmm/fastlmmrslib"
+readme = "README.md"
+include = ["src/**", "examples/**", "python/**", "tests/**", "Cargo.toml", "Cargo.lock", "pyproject.toml", "README.md", "LICENSE", "NOTICE.Davies", "ThirdPartyNotices.original.txt", "compare_legacy.py", "CHANGELOG.md", "RELEASING.md"]
 
 [lib]
 crate-type = ["rlib", "cdylib"]

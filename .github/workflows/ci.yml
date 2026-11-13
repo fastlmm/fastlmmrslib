@@ -1,10 +1,15 @@
 name: CI
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
 jobs:
   rust:
     timeout-minutes: 15
@@ -88,3 +93,44 @@ jobs:
           cd "$RUNNER_TEMP"
           cp -r "$GITHUB_WORKSPACE/tests" quadratic_form_tests
           uv run --no-project --python "$GITHUB_WORKSPACE/.artifact-venv" python -m unittest discover -s quadratic_form_tests -v
+      - name: Upload source distribution
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
+  distributions:
+    name: Validate release distributions
+    needs: [rust, wheels, sdist]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: wheel-*
+          merge-multiple: true
+          path: dist
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: sdist
+          path: dist
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.12.24"
+      - name: Require all wheels and one source distribution
+        run: |
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          wheels = list(Path("dist").glob("*.whl"))
+          sources = list(Path("dist").glob("*.tar.gz"))
+          assert len(wheels) == 30, len(wheels)
+          assert len(sources) == 1, len(sources)
+          PYTHON
+      - name: Validate metadata
+        run: uv tool run --python 3.14 twine==7.0.0 check --strict dist/*
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fastlmmrslib-distributions
+          path: dist/*
+          if-no-files-found: error
