@@ -8,6 +8,9 @@ or release tag is authorized merely by preparing this candidate.
 
 - Run `cargo fmt --check`, `cargo test --locked`, and minimum-Rust 1.85 strict
   `cargo clippy --locked --all-targets --all-features -- -D warnings`.
+  Also test on current stable Rust on every native platform. Build release
+  wheels and sdist-derived wheels with current stable; 1.85 is a verified
+  compatibility minimum, not the production compiler pin.
 - Require the complete CI workflow: Rust checks on six native platforms,
   installed wheels on Python 3.11–3.15 on those platforms, and installed
   source-derived wheels on Python 3.11 and 3.15. The final job requires all
