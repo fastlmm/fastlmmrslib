@@ -3,6 +3,8 @@
 ## 0.1.0 — Unreleased
 
 - First Rust and Python release candidate, selected by the maintainer.
+- Verify Rust 1.85 compatibility and current stable on every native platform;
+  use current stable Rust for release artifacts.
 - Translate the full Davies quadratic-form calculation to safe Rust with
   per-call state; support signed weights, noncentrality, degrees of freedom,
   and an additional normal component.
