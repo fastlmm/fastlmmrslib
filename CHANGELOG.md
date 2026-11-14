@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 — 2026-11-13
+
+- Fix GitHub history.
+
 ## 0.1.0 — 2026-11-13
 
 - First Rust and Python release candidate, selected by the maintainer.
