@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 — Unreleased
+## 0.1.0 — 2026-11-13
 
 - First Rust and Python release candidate, selected by the maintainer.
 - Verify Rust 1.85 compatibility and current stable on every native platform;
