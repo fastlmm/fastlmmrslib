@@ -38,6 +38,12 @@ review on that environment. Review and approve the final provenance wording.
 Merge the qualified candidate, date the changelog, and explicitly authorize
 publication before creating or pushing `v0.1.0`.
 
+Full CI runs on pull requests, monthly, and for release tags, but not again
+after merging. Branch protection on `main` requires each PR to be up to date
+with `main` and to pass the `CI result` check, so the PR run has already tested
+exactly what lands. Make every change to `main`, including the changelog date,
+through a PR.
+
 The tag workflow verifies Python/Rust/tag version agreement and reuses the
 complete CI workflow. Its publishing job waits for all qualification jobs and
 the environment's approval, then publishes the exact

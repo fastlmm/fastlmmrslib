@@ -1,8 +1,11 @@
 name: CI
+# Full CI runs on pull requests, monthly, and for release tags (via
+# workflow_call). Pushes to main are not retested: branch protection requires
+# PRs to be up to date with main and to pass "CI result" before merging.
 on:
-  push:
-    branches: [main]
   pull_request:
+  schedule:
+    - cron: "0 0 1 * *"
   workflow_dispatch:
   workflow_call:
 permissions:
@@ -161,3 +164,18 @@ jobs:
           name: fastlmmrslib-distributions
           path: dist/*
           if-no-files-found: error
+  ci-result:
+    # The single required status check for branch protection. It runs even
+    # when other jobs fail, so a failure can never appear as a passing skip.
+    name: CI result
+    if: always()
+    needs: [rust, wheels, sdist, distributions]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every CI job to succeed
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: |
+          echo "$RESULTS"
+          jq -e 'all(.[]; . == "success")' <<< "$RESULTS"
