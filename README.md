@@ -1,8 +1,8 @@
 # fastlmmrslib
 
 Rust successor to fastlmmclib's quadratic-form implementation.
-Version 0.1.0 is the maintainer-selected first release candidate; it has not
-yet been published. See [RELEASING.md](RELEASING.md) for qualification and publication.
+The current release is 0.1.1, available on [PyPI](https://pypi.org/project/fastlmmrslib/0.1.1/).
+See [RELEASING.md](RELEASING.md) for qualification and publication.
 
 The numerical core translates Robert Davies' full QFC algorithm into safe
 Rust with per-call state and structured propagation of search-limit failures.
